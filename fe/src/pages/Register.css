@@ -1,0 +1,17 @@
+.register-container {
+    height: 50vh;
+    margin: 11% auto;
+}
+.register-form{
+    padding: 2.3rem;
+}
+
+.twitter-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #1DA1F2;
+    color: #fff;
+    font-size: 4rem;
+}
