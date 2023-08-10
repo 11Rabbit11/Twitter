@@ -1,6 +1,6 @@
 import './Login.css';
 import { Link, useNavigate } from 'react-router-dom'
-import { TiMessages } from "react-icons/ti";
+import { AiOutlineComment } from 'react-icons/ai';
 import { useState } from 'react';
 import { API_BASE_URL } from '../config'
 import { toast } from 'react-toastify'
@@ -8,6 +8,7 @@ import axios from 'axios';
 
 const Login = () => {
 
+    const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
@@ -15,17 +16,19 @@ const Login = () => {
 
     const login = (event) => {
         event.preventDefault();
+        setLoading(true);
         const requestData = { username, password };
-        debugger;
-        axios.post(`${API_BASE_URL}/api/auth/login`, requestData)
+        axios.post(`${API_BASE_URL}/auth/login`, requestData)
             .then((result) => {
                 if (result.status === 200) {
+                    setLoading(false);
                     localStorage.setItem('token', result.data.result.token);
                     localStorage.setItem('user', JSON.stringify(result.data.result.user));
                     navigate('/home');
                 }
             }).catch((err) => {
                 console.log(err.message);
+                setLoading(false);
                 toast.error(err.response.data.error);
             });
     }
@@ -38,7 +41,7 @@ const Login = () => {
                 {/* Twitter Icon and Welcome Message */}
                 <div className="col-md-5 col-sm-12 twitter-icon d-flex flex-column rounded-start">
                     <h3 className='my-3'>Welcome Back</h3>
-                    <TiMessages className="mb-5" size={95} />
+                    <AiOutlineComment className="mb-5" size={75} />
                 </div>
                 {/* Form Start */}
                 <div className="col-md-7 col-sm-12 text-start login-form rounded-end border">
@@ -52,7 +55,10 @@ const Login = () => {
                         <div className="mb-3 ms-2 ">
                             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-control" id="password" placeholder="Password" />
                         </div>
-                        <button type="submit" className="btn btn-dark ms-3">Log In</button>
+                        { loading ?
+                            <button type="submit" className="btn btn-light-outline ms-3 disabled">Loading...</button>
+                           : <button type="submit" className="btn btn-dark ms-3">Log In</button>
+                        }
                     </form>
 
                     <div className='my-3 mb-5'>
