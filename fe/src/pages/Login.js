@@ -11,7 +11,6 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-
     const navigate = useNavigate();
 
     const login = (event) => {
@@ -24,6 +23,9 @@ const Login = () => {
                     setLoading(false);
                     localStorage.setItem('token', result.data.result.token);
                     localStorage.setItem('user', JSON.stringify(result.data.result.user));
+                    toast.success('Logged In Successfully', {
+                        autoClose: 2000,
+                    });
                     navigate('/home');
                 }
             }).catch((err) => {
@@ -43,6 +45,7 @@ const Login = () => {
                     <h3 className='my-3'>Welcome Back</h3>
                     <AiOutlineComment className="mb-5" size={75} />
                 </div>
+
                 {/* Form Start */}
                 <div className="col-md-7 col-sm-12 text-start login-form rounded-end border">
 
@@ -55,9 +58,9 @@ const Login = () => {
                         <div className="mb-3 ms-2 ">
                             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-control" id="password" placeholder="Password" />
                         </div>
-                        { loading ?
+                        {loading ?
                             <button type="submit" className="btn btn-light-outline ms-3 disabled">Loading...</button>
-                           : <button type="submit" className="btn btn-dark ms-3">Log In</button>
+                            : <button type="submit" className="btn btn-dark ms-3">Log In</button>
                         }
                     </form>
 

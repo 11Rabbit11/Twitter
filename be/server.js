@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 
+
 //Import cors and mongoose libraries
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -8,6 +9,8 @@ const mongoose = require('mongoose');
 // Import the MONGODB_URL from the config file
 const { MONGODB_URL } = require('./config');
 
+console.clear();
+global.__basedir = __dirname;
 // Connect to MongoDB using the MONGODB_URL
 mongoose.connect(MONGODB_URL);
 

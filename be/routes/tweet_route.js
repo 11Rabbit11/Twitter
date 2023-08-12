@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         cb(null, file.originalname) // Setting the filename for the uploaded file
     }
-})
+});
 
 // Configuring multer middleware with storage, file size limit, and file type filter
 const upload = multer({
@@ -29,10 +29,11 @@ const upload = multer({
             return res.status(400).json({ error: 'Please upload a valid image file. File types allowed are .jpg, .jpeg, .png' });
         }
     }
-})
+});
+
 
 //Create Tweet
-router.post('/', upload.single('tweetImage'), protectedRoute, async (req, res) => {
+router.post('/', upload.single('file'), protectedRoute, async (req, res) => {
     try {
         const { content } = req.body;
         if (!content) {

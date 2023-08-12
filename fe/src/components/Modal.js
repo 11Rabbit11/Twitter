@@ -7,8 +7,8 @@ const Modal = ({ show, onClose, children }) => {
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">New Tweet</h5>
-            <button type="button" className="close" onClick={onClose} aria-label="Close">
-              <span aria-hidden="true">&times;</span>
+            <button type="button" className="close btn" onClick={onClose} aria-label="Close">
+              <span className='' aria-hidden="true">X</span>
             </button>
           </div>
           <div className="modal-body">

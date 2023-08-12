@@ -36,7 +36,7 @@ const Profile = () => {
     }
 
     useEffect(() => { 
-        getAllTweets();
+        getAllTweets()
         getUser(); 
     });
 
