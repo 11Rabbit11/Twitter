@@ -10,6 +10,7 @@ import { NavLink } from 'react-router-dom';
 import Modal from './Modal';
 
 const TweetCard = (props) => {
+    
 
     const [show, setShow] = useState(false);
 
@@ -42,6 +43,7 @@ const TweetCard = (props) => {
 
     const [likestatus, setLikeStatus] = useState(false);
     const currentUser = JSON.parse(localStorage.getItem('user'));
+
     const formatDate = (date) => {
         return new Date(date).toLocaleString("en-US", {
             day: "numeric",
@@ -50,15 +52,12 @@ const TweetCard = (props) => {
         });
     };
 
-
     const CONFIG_OBJ = {
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
     }
-
-
 
     const deleteTweet = async (tweetId) => {
         const response = await axios.delete(`${API_BASE_URL}/tweet/${tweetId}`, CONFIG_OBJ);
@@ -101,8 +100,13 @@ const TweetCard = (props) => {
 
     useEffect(() => {
         // Check if the current user's ID is present in tweet.likes array
-        const isLikedByCurrentUser = props?.tweet?.likes.some(like => like._id === currentUser._id);
-        setLikeStatus(isLikedByCurrentUser);
+       if(props.isTweetPage){
+           const isLikedByCurrentUser = props.tweet.likes.includes(currentUser._id);
+           setLikeStatus(isLikedByCurrentUser);
+       } else {
+           const isLikedByCurrentUser = props?.tweet?.likes.some(like => like._id === currentUser._id);
+           setLikeStatus(isLikedByCurrentUser);
+       }
     }, [props, likestatus, currentUser]);
 
 

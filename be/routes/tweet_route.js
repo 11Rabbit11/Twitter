@@ -76,7 +76,6 @@ router.get('/:id', async (req, res) => {
                     select: '-password'
                 }
             })
-            .populate('likes', '-password')
             .populate('retweetBy', '-password');
         //Check if tweet is found or not
         if (!tweet) {

@@ -45,13 +45,13 @@ const TweetsPage = () => {
                 </div>
                 {/* List of tweets */}
                 {loading ? (<h1>Loading...</h1>) :
-                    <TweetCard getTweets={getTweet} user={user} tweet={tweet} />
+                    <TweetCard getTweets={getTweet} user={user} tweet={tweet} isTweetPage={true} />
                 }
                 <div className='replies ms-2 mt-2 mb-3'><h4>Replies :</h4></div>
                 <Tweet className="tweets mx-3">
                     {loading ? (<h1>Loading...</h1>) : (replies?.map((tweet) => {
                         return (<div className='border border-bottom-0'>
-                        <TweetCard getTweets={getTweet} user={user} tweet={tweet} />
+                        <TweetCard getTweets={getTweet} user={user} tweet={tweet} isTweetPage={true}/>
                         </div>)
                     }))}
                 </Tweet>

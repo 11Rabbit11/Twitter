@@ -58,6 +58,14 @@ const Profile = () => {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
         }
     }
+    
+    const formatDate = (date) => {
+        return new Date(date).toLocaleString("en-US", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        });
+    };
 
     const getAllTweets = async () => {
         try {
@@ -186,7 +194,7 @@ const Profile = () => {
                             </div>
                             <div className="last-used d-flex m-2 align-items-center">
                                 <i class="fa-solid fa-calendar-days ms-3 me-2"></i>
-                                <span>Last Used</span>
+                                <span>Joined {formatDate(user?.createdAt)}</span>
                             </div>
                             <div className='d-flex mt-4 align-items-center'>
                                 <span className='mx-2'><h5>{user?.followers?.length} Followers</h5></span>
