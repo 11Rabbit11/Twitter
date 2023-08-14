@@ -15,27 +15,20 @@ const Right = styled.div`
 
 const HomePage = () => {
 
-  const [user, setUser] = useState({});
+  const [userSB, setUserSB] = useState({});
   const [show, setShow] = useState(false);
   const [image, setImage] = useState({ preview: '', data: '' });
 
-  const CONFIG_OBJ = {
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + localStorage.getItem('token')
-    }
-  }
-
   const handleClose = () => {
-    setShow(false);
     setImage({ preview: '', data: '' });
     setContent('');
+    setShow(false);
   };
 
   const handleShow = () => setShow(true);
 
   const [content, setContent] = useState('');
-  
+
   const handleFileSelect = (e) => {
     if (e.target.files.length > 0) {
       const img = {
@@ -43,52 +36,38 @@ const HomePage = () => {
         data: e.target.files[0]
       }
       setImage(img);
-      console.log(image.data);
-    }
-  }
-
-  const handleImgUpload = async () => {
-    try {
-      if(!image.data) return null;
-      //If no image selected return null
-      const formData = new FormData();
-      formData.append('file', image.data);
-      console.log(formData);
-      const response = await axios.post(`${API_BASE_URL}/tweet/`, formData,
-      { headers: { 'Content-Type': 'multipart/form-data','Authorization': 'Bearer ' + localStorage.getItem('token') } } );
-      return response;
-    } catch (error) {
-      console.log(error.response);
+      console.log(img);
     }
   }
 
   const addTweet = async () => {
-    if (content === '') {
-      toast.error('Please enter some content');
-    } else {
-      let imageUrl = '';
-      if (image.data) {
-        const imgRes = await handleImgUpload();
-        if (imgRes.status !== 201) {
-          toast.error('Some error occurred while uploading image');
-          return;
-        }
-        imageUrl = `${API_BASE_URL}/images/${imgRes.data.fileName}`;
-      }
-      const request = {
-        content: content,
-        image: imageUrl,
-      };
-      // Write API call to create tweet
-      const postResponse = await axios.post(`${API_BASE_URL}/tweet/`, request, CONFIG_OBJ);
-      if (postResponse.status === 201) {
-        toast.success('Tweet posted successfully',{ autoClose: 2300 });
-        getAllTweets();
-        handleClose();
+    try {
+      if (content === '') {
+        toast.error('Please enter some content');
       } else {
-        toast.error('Some error occurred while posting tweet');
+        const formData = new FormData();
+        formData.append('content', content);
+        if (image.data) {
+          formData.append('file', image.data);
+        }
+        const response = await axios.post(
+          `${API_BASE_URL}/tweet/`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: 'Bearer ' + localStorage.getItem('token')
+          }
+        }
+        );
         handleClose();
+        if (response.status === 201) {
+          toast.success('Tweet posted successfully', { autoClose: 2300 });
+          getAllTweets();
+        } else {
+          toast.error('Some error occurred while posting tweet', { autoClose: 2300 });
+        }
       }
+    } catch (error) {
+      console.log(error.response.data);
     }
   };
 
@@ -98,7 +77,7 @@ const HomePage = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/user/${currentUser._id}`);
       if (response.status === 200) {
-        setUser(response.data.user);
+        setUserSB(response.data.user);
       } else {
         response.json({ error: 'Some error occurred while getting user\n' })
       }
@@ -127,10 +106,9 @@ const HomePage = () => {
     getUser();
   }, []);
 
-
   return (
     <div className="container home-page d-flex w-75">
-      <Sidebar key={user._id} user={user} />
+      <Sidebar key={userSB._id} user={userSB} />
       <div className="tweet-list w-75">
         <div className="top d-flex align-items-center justify-content-between my-4 mx-2 px-1">
           <h3>Home  </h3>
@@ -139,7 +117,7 @@ const HomePage = () => {
         {/* List of tweets */}
         <Right className='tweets mx-1'>
           {alltweets.map((tweets) => (
-            <TweetCard key={tweets._id} getAllTweets={getAllTweets} tweet={tweets} user={user} />
+            <TweetCard key={tweets._id} getTweets={getAllTweets} tweet={tweets} />
           ))}
         </Right>
       </div>

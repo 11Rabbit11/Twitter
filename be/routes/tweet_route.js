@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const TweetModel = mongoose.model('TweetModel');
 const protectedRoute = require('../middleware/protectedResource');
+const path = require('path');
 
 // Configuring multer for file upload
 const storage = multer.diskStorage({
@@ -11,7 +12,10 @@ const storage = multer.diskStorage({
         cb(null, 'images/') // Setting the destination directory for uploaded files
     },
     filename: function (req, file, cb) {
-        cb(null, file.originalname) // Setting the filename for the uploaded file
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.originalname);
+        const fileName = `tweet-${uniqueSuffix}${fileExtension}`;
+        cb(null, fileName) // Setting the filename for the uploaded file
     }
 });
 
@@ -73,6 +77,7 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Tweet not found' });
         }
         res.status(200).json({ tweet: tweet });
+        console.log(tweet);
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ error: 'Internal server error' });

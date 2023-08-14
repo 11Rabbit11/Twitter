@@ -5,13 +5,13 @@ const multer = require('multer');
 const UserModel = mongoose.model('UserModel'); // Importing the UserModel from the 'UserModel' file
 const TweetModel = mongoose.model('TweetModel'); // Importing the UserModel from the 'UserModel' file
 const protectedRoute = require('../middleware/protectedResource'); //Import Middleware
-
+const path = require('path');
 
 //GET Single User--------------------------------------------
 router.get('/:id', async (req, res) => {
     await UserModel.findById(req.params.id)
-        .populate('following', '_id fullName username') // Populating
-        .populate('followers', '_id fullName username')
+        .populate('following', '-password') // Populating
+        .populate('followers', '-password')
         .then(user => {
             // Destructure the 'password' field from the user object and assign the rest of the fields to 'userData'
             if (!user) {
@@ -93,6 +93,9 @@ const storage = multer.diskStorage({
         cb(null, 'images/') // Setting the destination directory for uploaded files
     },
     filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = path.extname(file.originalname);
+        const fileName = `profilepic-${uniqueSuffix}${fileExtension}`;
         cb(null, file.originalname) // Setting the filename for the uploaded file
     }
 })

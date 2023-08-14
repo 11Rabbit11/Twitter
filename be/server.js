@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
-
+const path = require("path");
+app.use("/images", express.static(path.join(__dirname, "/images")));
 
 //Import cors and mongoose libraries
 const cors = require('cors');
@@ -10,7 +11,7 @@ const mongoose = require('mongoose');
 const { MONGODB_URL } = require('./config');
 
 console.clear();
-global.__basedir = __dirname;
+
 // Connect to MongoDB using the MONGODB_URL
 mongoose.connect(MONGODB_URL);
 
@@ -34,9 +35,9 @@ require('./models/user_model');
 require('./models/tweet_model');
 
 //Routes
-app.use( '/api/user', require('./routes/user_route'));
-app.use( '/api/tweet', require('./routes/tweet_route'));
-app.use( '/api/auth', require('./routes/auth_route'));
+app.use('/api/user', require('./routes/user_route'));
+app.use('/api/tweet', require('./routes/tweet_route'));
+app.use('/api/auth', require('./routes/auth_route'));
 
 // Start the server on port 5000
 app.listen(5000, () => {
