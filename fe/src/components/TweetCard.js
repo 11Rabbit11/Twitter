@@ -7,18 +7,49 @@ import { API_BASE_URL, IMAGE_BASE_URL } from '../config'
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { NavLink } from 'react-router-dom';
+import Modal from './Modal';
 
 const TweetCard = (props) => {
+
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => {
+        setContent('');
+        setShow(false);
+    };
+    const handleShow = () => setShow(true);
+    const [content, setContent] = useState('');
+    const addReply = async () => {
+        try {
+            if (content === '') {
+                toast.error('Please enter some content');
+            } else {
+
+                const response = await axios.post(
+                    `${API_BASE_URL}/tweet/${props?.tweet?._id}/reply`, { content: content }, {
+                    headers: { Authorization: 'Bearer ' + localStorage.getItem('token') }
+                });
+                props.getTweets();
+                handleClose();
+                toast.success('Reply posted successfully', { autoClose: 2300 });
+
+            }
+        } catch (error) {
+            toast.error('Some error occurred while posting reply.', { autoClose: 2300 });
+            console.log(error.response.data);
+        }
+    };
 
     const [likestatus, setLikeStatus] = useState(false);
     const currentUser = JSON.parse(localStorage.getItem('user'));
     const formatDate = (date) => {
         return new Date(date).toLocaleString("en-US", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
         });
-      };
+    };
+
 
     const CONFIG_OBJ = {
         headers: {
@@ -36,7 +67,7 @@ const TweetCard = (props) => {
             props.getTweets();
         }
     }
-    console.log(props.tweet);
+
     const retweetBy = (props.tweet?.retweetBy > 0) ? props.tweet?.retweetBy[props?.tweet?.retweetBy.length - 1] : null;
     const likeUnlikePost = async (type) => {
         const request = { "id": props?.tweet?._id };
@@ -50,7 +81,7 @@ const TweetCard = (props) => {
         } catch (error) {
             console.log(error);
         }
-        
+
     }
     const retweet = async () => {
         try {
@@ -74,6 +105,7 @@ const TweetCard = (props) => {
         setLikeStatus(isLikedByCurrentUser);
     }, [props, likestatus, currentUser]);
 
+
     return (
         <div className="card mb-1 border-0 border-bottom">
             <div className="card-body">
@@ -82,16 +114,16 @@ const TweetCard = (props) => {
                     Retweeted by @ {retweetBy.username}
                 </span> : ''}
                 <div className="d-flex align-items-center">
-                    <NavLink to={`/user/${props?.tweet?.tweetedBy._id}`}>
-                        <img src={props?.tweet?.tweetedBy.profileImg} alt="User Profile" className="rounded-circle me-2" width="50" height="50" />
+                    <NavLink to={`/user/${props?.tweet?.tweetedBy?._id}`}>
+                        <img src={(props?.tweet.tweetedBy?.profileImg) ? IMAGE_BASE_URL + props?.tweet.tweetedBy?.profileImg : 'https://images.unsplash.com/photo-1578309992775-ca77477765ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHNlbGVjdCUyMGltYWdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'} alt="User Profile" className="rounded-circle me-2" width="50" height="50" />
                     </NavLink>
                     <div>
-                        <NavLink to={`/profile/${props?.tweet?.tweetedBy._id}`} style={{ textDecoration: 'none', color: 'black' }}>
-                            <p className="mb-0 mt-2 fw-bold">{props?.tweet?.tweetedBy.fullName}</p>
+                        <NavLink to={`/profile/${props?.tweet?.tweetedBy?._id}`} style={{ textDecoration: 'none', color: 'black' }}>
+                            <p className="mb-0 mt-2 fw-bold">{props?.tweet?.tweetedBy?.fullName}</p>
                         </NavLink>
-                        <p className="text-muted">@{props?.tweet?.tweetedBy.username} · {formatDate(props?.tweet?.createdAt)}</p>
+                        <p className="text-muted">@{props?.tweet?.tweetedBy?.username} · {formatDate(props?.tweet?.createdAt)}</p>
                     </div>
-                    {currentUser._id === props?.tweet?.tweetedBy._id ? <MdDeleteForever onClick={() => deleteTweet(props?.tweet?._id)} style={{ cursor: 'pointer' }} className='ms-auto mb-3' color='red' size={25} /> : ''}
+                    {currentUser._id === props?.tweet?.tweetedBy?._id ? <MdDeleteForever onClick={() => deleteTweet(props?.tweet?._id)} style={{ cursor: 'pointer' }} className='ms-auto mb-3' color='red' size={25} /> : ''}
                 </div>
                 <NavLink to={`/tweet/${props?.tweet?._id}`} style={{ textDecoration: 'none', color: 'black' }}>
                     {/* Content */}
@@ -100,11 +132,22 @@ const TweetCard = (props) => {
                 </NavLink>
                 <div className="d-flex justify-content-start align-items-center fs-5">
                     {likestatus ? <FcLike style={{ cursor: 'pointer' }} onClick={() => { likeUnlikePost('dislike') }} className='me-1' />
-                        : <AiOutlineHeart style={{ cursor: 'pointer' }} onClick={() => { likeUnlikePost( 'like') }} className='me-1' color='red' />}{props?.tweet?.likes.length}
-                    <FaRegComment className='ms-5 me-1' color='#1DA1F2' />{props?.tweet?.replies.length}
+                        : <AiOutlineHeart style={{ cursor: 'pointer' }} onClick={() => { likeUnlikePost('like') }} className='me-1' color='red' />}{props?.tweet?.likes.length}
+                    <FaRegComment style={{ cursor: 'pointer' }} onClick={handleShow} className='ms-5 me-1' color='#1DA1F2' />{props?.tweet?.replies.length}
                     <i onClick={() => retweet()} className="fas fa-retweet ms-5 me-1" style={{ cursor: 'pointer', color: '#54b38a' }}></i>{props?.tweet?.retweetBy.length}
                 </div>
             </div>
+            {/* Modal here */}
+            <Modal show={show} onClose={handleClose} title="New Reply">
+                {/* Modal content */}
+                <div className=''>
+                    <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="What's happening?" rows="4" className="form-control mb-3"></textarea>
+                    <div className='row'>
+                        <button className="btn btn-primary col-3 ms-auto me-2" onClick={addReply}>Tweet</button>
+                    </div>
+                </div>
+            </Modal>
+
         </div>
 
     );

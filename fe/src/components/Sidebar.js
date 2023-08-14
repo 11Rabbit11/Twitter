@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import { toast } from 'react-toastify';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../config'
+import { API_BASE_URL, IMAGE_BASE_URL } from '../config'
+
 
 //Style Componenet
 const StyledNavLink = styled(NavLink)`
@@ -29,7 +30,7 @@ const StyledNavLink = styled(NavLink)`
   }
 `;
 
-const Sidebar = (props) => {
+const Sidebar = () => {
 
   const [userSB, setUserSB] = useState({});
   const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -70,7 +71,7 @@ const Sidebar = (props) => {
       <div className="user-info mt-auto">
         {/* Logged-in user's name and email */}
         <div className="d-flex align-items-center">
-          <img src={userSB.profileImg} alt="User Profile" className="rounded-circle me-2" width="50" height="50" />
+          <img src={userSB?.profileImg ? IMAGE_BASE_URL + userSB.profileImg : 'https://images.unsplash.com/photo-1578309992775-ca77477765ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHNlbGVjdCUyMGltYWdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60' } alt="User Profile" className="rounded-circle me-2" width="50" height="50" />
           <div>
             <h5 className="pt-3 mb-0">{userSB.fullName}</h5>
             <p className="text-muted">@{userSB.username}</p>

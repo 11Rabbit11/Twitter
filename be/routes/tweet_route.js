@@ -69,15 +69,20 @@ router.get('/:id', async (req, res) => {
     try {
         const tweet = await TweetModel.findById(req.params.id)
             .populate('tweetedBy', '-password')
-            .populate('replies', '-password')
+            .populate({
+                path: 'replies',
+                populate: {
+                    path: 'tweetedBy',
+                    select: '-password'
+                }
+            })
             .populate('likes', '-password')
             .populate('retweetBy', '-password');
         //Check if tweet is found or not
         if (!tweet) {
             return res.status(404).json({ error: 'Tweet not found' });
         }
-        res.status(200).json({ tweet: tweet });
-        console.log(tweet);
+        res.status(200).json( tweet );
     } catch (err) {
         console.log(err.message);
         res.status(500).json({ error: 'Internal server error' });

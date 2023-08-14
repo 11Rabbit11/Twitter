@@ -8,23 +8,23 @@ import styled from 'styled-components';
 
 const Tweet = styled.div`
   overflow-y: auto;
-  height: 65vh;
+  height: 62vh;
 `;
 
 const TweetsPage = () => {
     const params = useParams();
+    const [loading, setLoading] = useState(true);
     const [user, setUser] = useState({});
-    const [alltweets, setAllTweets] = useState([]);
+    const [tweet, setTweet] = useState([]);
+    const [replies, setReplies] = useState([]);
 
     const getTweet = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/tweet/${params.id}`);
-            if (response.status === 200) {
-                console.log(response.data);
-                setAllTweets(response.data.tweet);
-            } else {
-                console.error('Error while getting tweets');
-            }
+            setTweet(response.data);
+            setReplies(response.data.replies);
+            setLoading(false);
+            setUser(response.data.tweetedBy._id);
         } catch (error) {
             console.log(error.response.data);
         }
@@ -33,9 +33,8 @@ const TweetsPage = () => {
     useEffect(() => {
 
         getTweet();
-    }, []);
 
-console.log(alltweets);
+    }, [])
 
     return (
         <div className="container d-flex w-75">
@@ -44,15 +43,17 @@ console.log(alltweets);
                 <div className="top d-flex align-items-center justify-content-between my-4 mx-2 px-1">
                     <h3>Tweets</h3>
                 </div>
-                <Tweet className="tweets mx-1">
-                    <TweetCard tweet={alltweets}>
-                    </TweetCard> 
-                </Tweet>
                 {/* List of tweets */}
-                <Tweet className="tweets mx-1">
-                    {(alltweets.replies?.length > 0) ? (alltweets.replies?.map((tweets) => (
-                        <TweetCard key={tweets._id} tweet={tweets}  />
-                    ))) : '' }
+                {loading ? (<h1>Loading...</h1>) :
+                    <TweetCard getTweets={getTweet} user={user} tweet={tweet} />
+                }
+                <div className='replies ms-2 mt-2 mb-3'><h4>Replies :</h4></div>
+                <Tweet className="tweets mx-3">
+                    {loading ? (<h1>Loading...</h1>) : (replies?.map((tweet) => {
+                        return (<div className='border border-bottom-0'>
+                        <TweetCard getTweets={getTweet} user={user} tweet={tweet} />
+                        </div>)
+                    }))}
                 </Tweet>
             </div>
         </div>

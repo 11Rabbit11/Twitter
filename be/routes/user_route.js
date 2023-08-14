@@ -64,19 +64,19 @@ router.put('/:id', protectedRoute, async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
         // Destructure the fields to be updated from the request body
-        const { name, location, dateOfbirth } = req.body;
+        const { name, location, dob } = req.body;
 
         // Update the user object with the provided fields if they exist in the request body
-        if (name) { user.fullName = name; }
-        if (location) { user.location = location; }
-        if (dateOfbirth) { user.dateOfBirth = dateOfbirth; }
+        if (name !== null && name !== undefined && name !== "") { user.fullName = name; }
+        if (location !== null && location !== undefined && location !== "") { user.location = location; }
+        if (dob !== null && dob !== undefined && dob !== "") { user.dateOfBirth = dob; }
 
         // Save the updated user object to the database
         await user.save();
 
         // Set the 'password' field to undefined to prevent it from being sent in the response
         user.password = undefined;
-
+        
         // Return the updated user object in the response
         res.status(200).json({ result: 'User Updated Successfully', user });
     } catch (err) {
@@ -96,7 +96,7 @@ const storage = multer.diskStorage({
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const fileExtension = path.extname(file.originalname);
         const fileName = `profilepic-${uniqueSuffix}${fileExtension}`;
-        cb(null, file.originalname) // Setting the filename for the uploaded file
+        cb(null, fileName) // Setting the filename for the uploaded file
     }
 })
 
@@ -118,7 +118,26 @@ const upload = multer({
 
 // POST request for uploading a profile picture
 router.post('/:id/uploadProfilePic', upload.single('image'), async (req, res) => {
-    res.json({ "filename": req.file.filename });
+    try {
+        const userId = req.params.id;
+        const updatedFields = {};
+        
+        // Check if a file was uploaded
+        if (req.file) {
+            updatedFields.profileImg = req.file.path;
+        }
+
+        // Update the user's profile picture and retrieve the updated user
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            userId,
+            { $set: updatedFields },
+            { new: true }
+        );
+        res.status(200).json({ result: 'Profile Pic Updated Successfully' }) //Return the updated user    
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 //-------------------------------------------------------------------

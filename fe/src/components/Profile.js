@@ -1,7 +1,7 @@
 import Sidebar from '../components/Sidebar';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { API_BASE_URL } from '../config'
+import { API_BASE_URL, IMAGE_BASE_URL } from '../config'
 import TweetCard from '../components/TweetCard';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
@@ -14,12 +14,20 @@ const Tweet = styled.div`
 `;
 
 const Profile = () => {
-    
+
     const [showEdit, setEditShow] = useState(false);
     const [showEditPic, setPicShow] = useState(false);
-    
-    const handleEditClose = () => setEditShow(false);
-    const handlePicClose = () => setPicShow(false);
+
+    const handleEditClose = () => {
+        setEditShow(false);
+        setName('');
+        setLocation('');
+        setDob('');
+    };
+    const handlePicClose = () => {
+        setPicShow(false);
+        setImage({ preview: '', data: '' });
+    }
     const handleEditShow = () => setEditShow(true);
     const handlePicShow = () => setPicShow(true);
 
@@ -30,14 +38,13 @@ const Profile = () => {
 
     const handleFileSelect = (e) => {
         if (e.target.files.length > 0) {
-          const img = {
-            preview: URL.createObjectURL(e.target.files[0]),
-            data: e.target.files[0]
-          }
-          setImage(img);
-          console.log(img);
+            const img = {
+                preview: URL.createObjectURL(e.target.files[0]),
+                data: e.target.files[0]
+            }
+            setImage(img);
         }
-      }
+    }
 
     const params = useParams();
     const [user, setUser] = useState({});
@@ -79,35 +86,63 @@ const Profile = () => {
         }
     }
 
-    const addProfile = async () => {
+    const editProfile = async () => {
         try {
-          if (image === '') {
-            toast.error('Please enter some content');
-          } else {
-            const formData = new FormData();
-            if (image.data) {
-              formData.append('image', image.data);
+            const updatedProfile = {};
+            console.log(name);
+            updatedProfile.name = name || user.fullName;
+            if (location) {
+                updatedProfile.location = location;
             }
-            const response = await axios.post(
-              `${API_BASE_URL}/user/${params.id}/uploadProfilePic`, formData, {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: 'Bearer ' + localStorage.getItem('token')
-              }
+            if (dob) {
+                updatedProfile.dob = dob;
             }
-            );
-            handlePicClose();
-            if (response.status === 201) {
-              toast.success('Profile Pic Updated Successfully', { autoClose: 2300 });
-              getAllTweets();
-            } else {
-              toast.error('Some error occurred'+response.data, { autoClose: 2300 });
+            const response = await axios.put( `${API_BASE_URL}/user/${user._id}`, updatedProfile, CONFIG_OBJ);
+            if (response.status === 200) {
+                console.log('Profile updated successfully');
+                toast.success('Profile updated successfully', { autoClose: 2100 });
+                handleEditClose(); // Close the modal after updating
+                setUser(response.data.user);
+                window.location.reload();
             }
-          }
         } catch (error) {
-          console.log(error.response.data);
+            console.error(error);
+            toast.error('Some error occurred while updating profile', { autoClose: 2100 });
         }
-      };
+    };
+
+    const addProfilePic = async () => {
+        try {
+            if (image === '') {
+                toast.error('Please enter some content');
+            } else {
+                const formData = new FormData();
+                if (image.data) {
+                    formData.append('image', image.data);
+                }
+                const response = await axios.post(
+                    `${API_BASE_URL}/user/${params.id}/uploadProfilePic`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: 'Bearer ' + localStorage.getItem('token')
+                    }
+                }
+                );
+                handlePicClose();
+                if (response.status === 200) {
+                    console.log(response.data);
+                    toast.success('Profile Pic Updated Successfully', { autoClose: 2300 });
+                    setUser(response.data.user);
+                    getAllTweets();
+                    window.location.reload();
+                } else {
+                    toast.error('Some error occurred' + response.data, { autoClose: 2300 });
+                }
+            }
+        } catch (error) {
+            console.log(error.response.data);
+        }
+    };
 
     useEffect(() => {
         const getUser = async () => {
@@ -123,14 +158,13 @@ const Profile = () => {
                     return (follower._id === currentUser._id)
                 });
                 setFollowStatus(isFollowedByCurrentUser);
-                console.log(isFollowedByCurrentUser);
             } catch (error) {
                 console.log(error.response.data);
             }
         }
         getUser();
         getAllTweets();
-    }, [currentUser._id, params.id, followstatus]);
+    }, [currentUser._id, params, user, followstatus]);
 
     return (
         <div className="container d-flex w-75">
@@ -138,7 +172,7 @@ const Profile = () => {
             <div className="my-profile-content w-75">
                 <div className='top-section d-inline'>
                     <div className='d-flex background w-100' style={{ backgroundColor: '#1DA1F2', height: '6rem' }}>
-                        <img src={user?.profileImg} alt="User Profile" className="rounded-circle position-relative m-4 mt-5 " width="100" height="100" />
+                        <img src={(user?.profileImg) ? IMAGE_BASE_URL + user?.profileImg : 'https://images.unsplash.com/photo-1578309992775-ca77477765ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHNlbGVjdCUyMGltYWdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'} alt="User Profile" className="rounded-circle position-relative m-4 mt-5 " width="100" height="100" />
                     </div>
                     <div className='d-flex align-items-center justify-content-between'>
                         <div className='ms-3 w-50 d-inline-block'>
@@ -174,7 +208,7 @@ const Profile = () => {
                     {/* List of tweets */}
                     <Tweet className='tweets mx-1'>
                         {alltweets?.map((tweets) => (
-                            <TweetCard key={tweets._id} getTweets={getAllTweets} tweet={tweets} />
+                            <TweetCard key={tweets._id} getTweets={getAllTweets} user={user} tweet={tweets} />
                         ))}
                     </Tweet>
                 </div>
@@ -218,7 +252,7 @@ const Profile = () => {
                     </Modal.Body>
                     <Modal.Footer>
                         <button className="btn btn-secondary" onClick={handleEditClose}>Close</button>
-                        <button className="btn btn-primary" onClick={'handleEdit'}>Post</button>
+                        <button className="btn btn-primary" onClick={editProfile}>Post</button>
                     </Modal.Footer>
                 </Modal>
 
@@ -229,11 +263,11 @@ const Profile = () => {
                     <Modal.Body>
                         <input type="file" onChange={handleFileSelect} />
                         {image.preview ? <img src={image.preview} alt='' width='auto' height='280' position-absolute style={{ opacity: 0.8, marginTop: '10px' }} />
-                        : ''}
+                            : ''}
                     </Modal.Body>
                     <Modal.Footer>
                         <button className="btn btn-secondary" onClick={handlePicClose}>Close</button>
-                        <button className="btn btn-primary" onClick={'handleProfilePic'}>Post</button>
+                        <button className="btn btn-primary" onClick={addProfilePic}>Post</button>
                     </Modal.Footer>
                 </Modal>
             </div>

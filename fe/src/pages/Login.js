@@ -13,16 +13,22 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
-    const login = (event) => {
+    const login = async (event) => {
         event.preventDefault();
         setLoading(true);
         const requestData = { username, password };
-        axios.post(`${API_BASE_URL}/auth/login`, requestData)
+         await axios.post(`${API_BASE_URL}/auth/login`, requestData)
             .then((result) => {
                 if (result.status === 200) {
+                    
+                    const token =  result.data.result.token;
+                    const user =  result.data.result.user;
+
+                    localStorage.setItem('token', (token));
+                    localStorage.setItem('user', JSON.stringify(user));
                     setLoading(false);
-                    localStorage.setItem('token', result.data.result.token);
-                    localStorage.setItem('user', JSON.stringify(result.data.result.user));
+                   
+                    
                     toast.success('Logged In Successfully', {
                         autoClose: 2000,
                     });
@@ -31,7 +37,7 @@ const Login = () => {
             }).catch((err) => {
                 console.log(err.message);
                 setLoading(false);
-                toast.error(err.response.data.error);
+                // toast.error(err.response.data.error);
             });
     }
 

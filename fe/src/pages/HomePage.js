@@ -108,7 +108,7 @@ const HomePage = () => {
 
   return (
     <div className="container home-page d-flex w-75">
-      <Sidebar key={userSB._id} user={userSB} />
+      <Sidebar />
       <div className="tweet-list w-75">
         <div className="top d-flex align-items-center justify-content-between my-4 mx-2 px-1">
           <h3>Home  </h3>
@@ -117,13 +117,13 @@ const HomePage = () => {
         {/* List of tweets */}
         <Right className='tweets mx-1'>
           {alltweets.map((tweets) => (
-            <TweetCard key={tweets._id} getTweets={getAllTweets} tweet={tweets} />
+            <TweetCard userSB={tweets} key={tweets._id} getTweets={getAllTweets} tweet={tweets} />
           ))}
         </Right>
       </div>
 
       {/* Modal here */}
-      <Modal show={show} onClose={handleClose}>
+      <Modal show={show} onClose={handleClose} title="New Tweet">
         {/* Modal content */}
         <div className=''>
           <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="What's happening?" rows="4" className="form-control mb-3"></textarea>
