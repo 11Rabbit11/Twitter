@@ -36,6 +36,8 @@ const Sidebar = () => {
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
+    
+    //Api To get User
     const getUser = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/user/${currentUser._id}`);
@@ -51,6 +53,7 @@ const Sidebar = () => {
     getUser();
   }, [currentUser._id]);
 
+  //Handle Logout
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

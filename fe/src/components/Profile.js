@@ -36,6 +36,7 @@ const Profile = () => {
     const [dob, setDob] = useState('');
     const [image, setImage] = useState({ preview: '', data: '' });
 
+    //Handle when image is selected
     const handleFileSelect = (e) => {
         if (e.target.files.length > 0) {
             const img = {
@@ -52,6 +53,7 @@ const Profile = () => {
     const [followstatus, setFollowStatus] = useState(false);
     const [alltweets, setAllTweets] = useState([]);
 
+    //For Authentication
     const CONFIG_OBJ = {
         headers: {
             'Content-Type': 'application/json',
@@ -59,6 +61,7 @@ const Profile = () => {
         }
     }
     
+    //Formatting Date
     const formatDate = (date) => {
         return new Date(date).toLocaleString("en-US", {
             day: "numeric",
@@ -66,7 +69,8 @@ const Profile = () => {
             year: "numeric",
         });
     };
-
+    
+    //Api To get tweets
     const getAllTweets = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/user/${params.id}/tweets/`);
@@ -80,6 +84,7 @@ const Profile = () => {
         }
     }
 
+    //Handle Follow Unfollow
     const followUnfollow = async (id, type) => {
         const request = { "id": id };
         try {
@@ -94,6 +99,7 @@ const Profile = () => {
         }
     }
 
+    //When clicked on Edit Profile
     const editProfile = async () => {
         try {
             const updatedProfile = {};
@@ -119,6 +125,7 @@ const Profile = () => {
         }
     };
 
+    //When clicked on Edit Profile Pic
     const addProfilePic = async () => {
         try {
             if (image === '') {
@@ -153,6 +160,7 @@ const Profile = () => {
     };
 
     useEffect(() => {
+        //API call to get user
         const getUser = async () => {
             try {
                 const response = await axios.get(`${API_BASE_URL}/user/${params.id}`);
@@ -178,10 +186,16 @@ const Profile = () => {
         <div className="container d-flex w-75">
             <Sidebar />
             <div className="my-profile-content w-75">
+
+                {/* Top Section */}
                 <div className='top-section d-inline'>
+                    
+                    {/* Image */}
                     <div className='d-flex background w-100' style={{ backgroundColor: '#1DA1F2', height: '6rem' }}>
                         <img src={(user?.profileImg) ? IMAGE_BASE_URL + user?.profileImg : 'https://images.unsplash.com/photo-1578309992775-ca77477765ce?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHNlbGVjdCUyMGltYWdlfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60'} alt="User Profile" className="rounded-circle position-relative m-4 mt-5 " width="100" height="100" />
                     </div>
+                    
+                    {/* User Bio */}
                     <div className='d-flex align-items-center justify-content-between'>
                         <div className='ms-3 w-50 d-inline-block'>
                             <h2 className="mt-5 mb-0">{user?.fullName}</h2>
@@ -201,6 +215,8 @@ const Profile = () => {
                                 <span className='mx-2'><h5>{user?.following?.length} Following</h5></span>
                             </div>
                         </div>
+
+                        {/* Buttons */}
                         <div className='d-flex me-4'> {/* Edit Profile And Follow */}
                             {(currentUser?._id === user?._id) ? <>
                                 <button className="btn btn-outline-dark ms-2" onClick={handleEditShow}>Edit User Profile</button>
@@ -208,11 +224,13 @@ const Profile = () => {
                             </> : followstatus ? <button onClick={() => { followUnfollow(user?._id, 'unfollow') }} className="btn btn-dark mx-2 mb-5">Unfollow</button>
                                 : <button onClick={() => { followUnfollow(user?._id, 'follow') }} className="btn btn-outline-dark mx-2 mb-5">Follow</button>}
                         </div>
+
                     </div>
                     <div className='text-center'>
                         <hr />
                         <h5>Tweets and Replies</h5>
                     </div>
+
                     {/* List of tweets */}
                     <Tweet className='tweets mx-1'>
                         {alltweets?.map((tweets) => (
@@ -220,7 +238,8 @@ const Profile = () => {
                         ))}
                     </Tweet>
                 </div>
-
+                
+                {/* Modal here for Edit Profile */}
                 <Modal show={showEdit} onHide={handleEditClose}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit Profile</Modal.Title>
@@ -264,6 +283,7 @@ const Profile = () => {
                     </Modal.Footer>
                 </Modal>
 
+                {/* Modal here for Change Profile Pic */}
                 <Modal show={showEditPic} onHide={handlePicClose}>
                     <Modal.Header closeButton>
                         <Modal.Title>Edit Profile Pic</Modal.Title>

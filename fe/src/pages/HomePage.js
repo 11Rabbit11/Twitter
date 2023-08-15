@@ -40,6 +40,7 @@ const HomePage = () => {
     }
   }
 
+  //Handle Add Tweet
   const addTweet = async () => {
     try {
       if (content === '') {
@@ -71,7 +72,7 @@ const HomePage = () => {
     }
   };
 
-
+  //Get User from local storage
   const getUser = async () => {
     const currentUser = (JSON.parse(localStorage.getItem('user')));
     try {
@@ -86,6 +87,7 @@ const HomePage = () => {
     }
   }
 
+  //Get All Tweets
   const [alltweets, setAllTweets] = useState([]);
   const getAllTweets = async () => {
     try {
@@ -108,12 +110,14 @@ const HomePage = () => {
 
   return (
     <div className="container home-page d-flex w-75">
+      {/* Sidebar */}
       <Sidebar />
       <div className="tweet-list w-75">
         <div className="top d-flex align-items-center justify-content-between my-4 mx-2 px-1">
           <h3>Home  </h3>
           <button className="tweet-btn btn btn-secondary px-5" onClick={handleShow}>Tweet</button>
         </div>
+
         {/* List of tweets */}
         <Right className='tweets mx-1'>
           {alltweets.map((tweets) => (

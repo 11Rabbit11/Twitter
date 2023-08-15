@@ -18,6 +18,7 @@ const TweetsPage = () => {
     const [tweet, setTweet] = useState([]);
     const [replies, setReplies] = useState([]);
 
+    //Get Tweet
     const getTweet = async () => {
         try {
             const response = await axios.get(`${API_BASE_URL}/tweet/${params.id}`);
